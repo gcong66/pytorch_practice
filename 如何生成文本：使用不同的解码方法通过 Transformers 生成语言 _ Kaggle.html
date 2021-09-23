@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<!-- saved from url=(0048)https://www.kaggle.com/ssyyhwg/transformers/edit -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>如何生成文本：使用不同的解码方法通过 Transformers 生成语言 | Kaggle</title><link href="./如何生成文本：使用不同的解码方法通过 Transformers 生成语言 _ Kaggle_files/icon" rel="stylesheet"><style>@import url('https://fonts.googleapis.com/css?family=Inter:400,400i,500,500i,600,600i,700,700i');
+    @import url("https://use.typekit.net/tql2nih.css");
+
+    html,
+    body {
+      font-family: Inter, sans-serif;
+      height: 100%;
+      margin: 0;
+    }
+
+    .header {
+      padding: 0;
+    }
+
+    #root {
+      height: 100%;
+    }</style><meta name="description" content="The Kaggle Kernels IDE for Data Scientists."><script nonce="" defer="defer" src="./如何生成文本：使用不同的解码方法通过 Transformers 生成语言 _ Kaggle_files/notebook-fe093190769d0e36c2a2.js"></script><link href="./如何生成文本：使用不同的解码方法通过 Transformers 生成语言 _ Kaggle_files/notebook-084db19eaac8e6be8ef6.css" rel="stylesheet">
+
+          <script nonce="">window.KAGGLE_JUPYTERLAB_PATH = "/static/dist/jupyterlab/jupyterlab-index-1e64aa725cae6216d386.html";</script>
+          
+<style data-styled="active" data-styled-version="5.3.0"></style><style data-jss="" data-meta="MuiTouchRipple">
+.MuiTouchRipple-root {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 0;
+  overflow: hidden;
+  position: absolute;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.MuiTouchRipple-ripple {
+  opacity: 0;
+  position: absolute;
+}
+.MuiTouchRipple-rippleVisible {
+  opacity: 0.3;
+  animation: MuiTouchRipple-keyframes-mui-ripple-enter 550ms cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(1);
+}
+.MuiTouchRipple-ripplePulsate {
+  animation-duration: 200ms;
+}
+.MuiTouchRipple-child {
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 1;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+.MuiTouchRipple-childLeaving {
+  opacity: 0;
+  animation: MuiTouchRipple-keyframes-mui-ripple-exit 550ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.MuiTouchRipple-childPulsate {
+  top: 0;
+  left: 0;
+  position: absolute;
+  animation: MuiTouchRipple-keyframes-mui-ripple-pulsate 2500ms cubic-bezier(0.4, 0, 0.2, 1) 200ms infinite;
+}
+@-webkit-keyframes MuiTouchRipple-keyframes-mui-ripple-enter {
+  0% {
+    opacity: 0.1;
+    transform: scale(0);
+  }
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+}
+@-webkit-keyframes MuiTouchRipple-keyframes-mui-ripple-exit {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@-webkit-keyframes MuiTouchRipple-keyframes-mui-ripple-pulsate {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.92);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+</style><style data-jss="" data-meta="MuiButtonBase">
+.MuiButtonBase-root {
+  color: inherit;
+  border: 0;
+  cursor: pointer;
+  margin: 0;
+  display: inline-flex;
+  outline: none;
+  padding: 0;
+  position: relative;
+  align-items: center;
+  user-select: none;
+  border-radius: 0;
+  vertical-align: middle;
+  -moz-appearance: none;
+  justify-content: center;
+  text-decoration: none;
+  background-color: transparent;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.MuiButtonBase-root::-moz-focus-inner {
+  border-style: none;
+}
+.MuiButtonBase-root.Mui-disabled {
+  cursor: default;
+  pointer-events: none;
+}
+</style><style data-jss="" data-meta="MuiInputBase">
+.MuiInputBase-root {
+  color: rgba(0, 0, 0, 0.87);
+  cursor: text;
+  display: inline-flex;
+  position: relative;
+  font-size: 1rem;
+  box-sizing: border-box;
+  align-items: center;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  line-height: 1.1875em;
+}
+.MuiInputBase-root.Mui-disabled {
+  color: rgba(0, 0, 0, 0.38);
+  cursor: default;
+}
+.MuiInputBase-multiline {
+  padding: 6px 0 7px;
+}
+.MuiInputBase-multiline.MuiInputBase-marginDense {
+  padding-top: 3px;
+}
+.MuiInputBase-fullWidth {
+  width: 100%;
+}
+.MuiInputBase-input {
+  font: inherit;
+  color: currentColor;
+  width: 100%;
+  border: 0;
+  height: 1.1875em;
+  margin: 0;
+  display: block;
+  padding: 6px 0 7px;
+  min-width: 0;
+  background: none;
+  box-sizing: content-box;
+  -webkit-tap-highlight-color: transparent;
+}
+.MuiInputBase-input::-webkit-input-placeholder {
+  color: currentColor;
+  opacity: 0.42;
+  transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+}
+.MuiInputBase-input::-moz-placeholder {
+  color: currentColor;
+  opacity: 0.42;
+  transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+}
+.MuiInputBase-input:-ms-input-placeholder {
+  color: currentColor;
+  opacity: 0.42;
+  transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+}
+.MuiInputBase-input::-ms-input-placeholder {
+  color: currentColor;
+  opacity: 0.42;
+  transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+}
+.MuiInputBase-input:focus {
+  outline: 0;
+}
+.MuiInputBase-input:invalid {
+  box-shadow: none;
+}
+.MuiInputBase-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+.MuiInputBase-input.Mui-disabled {
+  opacity: 1;
+}
+label[data-shrink=false] + .MuiInputBase-formControl .MuiInputBase-input::-webkit-input-placeholder {
+  opacity: 0 !important;
+}
+label[data-shrink=false] + .MuiInputBase-formControl .MuiInputBase-input::-moz-placeholder {
+  opacity: 0 !important;
+}
+label[data-shrink=false] + .MuiInputBase-formControl .MuiInputBase-input:-ms-input-placeholder {
+  opacity: 0 !important;
+}
+label[data-shrink=false] + .MuiInputBase-formControl .MuiInputBase-input::-ms-input-placeholder {
+  opacity: 0 !important;
+}
+label[data-shrink=false] + .MuiInputBase-formControl .MuiInputBase-input:focus::-webkit-input-placeholder {
+  opacity: 0.42;
+}
+label[data-shrink=false] + .MuiInputBase-formControl .MuiInputBase-input:focus::-moz-placeholder {
+  opacity: 0.42;
+}
+label[data-shrink=false] + .MuiInputBase-formControl .MuiInputBase-input:focus:-ms-input-placeholder {
+  opacity: 0.42;
+}
+label[data-shrink=false] + .MuiInputBase-formControl .MuiInputBase-input:focus::-ms-input-placeholder {
+  opacity: 0.42;
+}
+.MuiInputBase-inputMarginDense {
+  padding-top: 3px;
+}
+.MuiInputBase-inputSelect {
+  padding-right: 24px;
+}
+.MuiInputBase-inputMultiline {
+  height: auto;
+  resize: none;
+  padding: 0;
+}
+.MuiInputBase-inputTypeSearch {
+  -moz-appearance: textfield;
+  -webkit-appearance: textfield;
+}
+</style><style data-jss="" data-meta="MuiInput">
+.MuiInput-root {
+  position: relative;
+}
+label + .MuiInput-formControl {
+  margin-top: 16px;
+}
+.MuiInput-underline:after {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  content: "";
+  position: absolute;
+  transform: scaleX(0);
+  transition: transform 200ms cubic-bezier(0.0, 0, 0.2, 1) 0ms;
+  border-bottom: 2px solid #303f9f;
+  pointer-events: none;
+}
+.MuiInput-underline.Mui-focused:after {
+  transform: scaleX(1);
+}
+.MuiInput-underline.Mui-error:after {
+  transform: scaleX(1);
+  border-bottom-color: #f44336;
+}
+.MuiInput-underline:before {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  content: "\00a0";
+  position: absolute;
+  transition: border-bottom-color 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.42);
+  pointer-events: none;
+}
+.MuiInput-underline:hover:not(.Mui-disabled):before {
+  border-bottom: 2px solid rgba(0, 0, 0, 0.87);
+}
+.MuiInput-underline.Mui-disabled:before {
+  border-bottom-style: dotted;
+}
+@media (hover: none) {
+  .MuiInput-underline:hover:not(.Mui-disabled):before {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.42);
+  }
+}
+</style><style data-jss="" data-meta="MuiIconButton">
+.MuiIconButton-root {
+  flex: 0 0 auto;
+  color: rgba(0, 0, 0, 0.54);
+  padding: 12px;
+  overflow: visible;
+  font-size: 1.5rem;
+  text-align: center;
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  border-radius: 50%;
+}
+.MuiIconButton-root:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+.MuiIconButton-root.Mui-disabled {
+  color: rgba(0, 0, 0, 0.26);
+  background-color: transparent;
+}
+@media (hover: none) {
+  .MuiIconButton-root:hover {
+    background-color: transparent;
+  }
+}
+.MuiIconButton-edgeStart {
+  margin-left: -12px;
+}
+.MuiIconButton-sizeSmall.MuiIconButton-edgeStart {
+  margin-left: -3px;
+}
+.MuiIconButton-edgeEnd {
+  margin-right: -12px;
+}
+.MuiIconButton-sizeSmall.MuiIconButton-edgeEnd {
+  margin-right: -3px;
+}
+.MuiIconButton-colorInherit {
+  color: inherit;
+}
+.MuiIconButton-colorPrimary {
+  color: #3f51b5;
+}
+.MuiIconButton-colorPrimary:hover {
+  background-color: rgba(63, 81, 181, 0.08);
+}
+@media (hover: none) {
+  .MuiIconButton-colorPrimary:hover {
+    background-color: transparent;
+  }
+}
+.MuiIconButton-colorSecondary {
+  color: #f50057;
+}
+.MuiIconButton-colorSecondary:hover {
+  background-color: rgba(245, 0, 87, 0.08);
+}
+@media (hover: none) {
+  .MuiIconButton-colorSecondary:hover {
+    background-color: transparent;
+  }
+}
+.MuiIconButton-sizeSmall {
+  padding: 3px;
+  font-size: 1.125rem;
+}
+.MuiIconButton-label {
+  width: 100%;
+  display: flex;
+  align-items: inherit;
+  justify-content: inherit;
+}
+</style><style data-jss="" data-meta="makeStyles">
+.jss94 {
+  padding: 5px;
+}
+</style><style data-jss="" data-meta="MuiButton">
+.MuiButton-root {
+  color: rgba(0, 0, 0, 0.87);
+  padding: 6px 16px;
+  font-size: 0.875rem;
+  min-width: 64px;
+  box-sizing: border-box;
+  transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  font-weight: 500;
+  line-height: 1.75;
+  border-radius: 4px;
+  letter-spacing: 0.02857em;
+  text-transform: uppercase;
+}
+.MuiButton-root:hover {
+  text-decoration: none;
+  background-color: rgba(0, 0, 0, 0.08);
+}
+.MuiButton-root.Mui-disabled {
+  color: rgba(0, 0, 0, 0.26);
+}
+@media (hover: none) {
+  .MuiButton-root:hover {
+    background-color: transparent;
+  }
+}
+.MuiButton-root:hover.Mui-disabled {
+  background-color: transparent;
+}
+.MuiButton-label {
+  width: 100%;
+  display: inherit;
+  align-items: inherit;
+  justify-content: inherit;
+}
+.MuiButton-text {
+  padding: 6px 8px;
+}
+.MuiButton-textPrimary {
+  color: #3f51b5;
+}
+.MuiButton-textPrimary:hover {
+  background-color: rgba(63, 81, 181, 0.08);
+}
+@media (hover: none) {
+  .MuiButton-textPrimary:hover {
+    background-color: transparent;
+  }
+}
+.MuiButton-textSecondary {
+  color: #f50057;
+}
+.MuiButton-textSecondary:hover {
+  background-color: rgba(245, 0, 87, 0.08);
+}
+@media (hover: none) {
+  .MuiButton-textSecondary:hover {
+    background-color: transparent;
+  }
+}
+.MuiButton-outlined {
+  border: 1px solid rgba(0, 0, 0, 0.23);
+  padding: 5px 16px;
+}
+.MuiButton-outlined.Mui-disabled {
+  border: 1px solid rgba(0, 0, 0, 0.26);
+}
+.MuiButton-outlinedPrimary {
+  color: #3f51b5;
+  border: 1px solid rgba(63, 81, 181, 0.5);
+}
+.MuiButton-outlinedPrimary:hover {
+  border: 1px solid #3f51b5;
+  background-color: rgba(63, 81, 181, 0.08);
+}
+@media (hover: none) {
+  .MuiButton-outlinedPrimary:hover {
+    background-color: transparent;
+  }
+}
+.MuiButton-outlinedSecondary {
+  color: #f50057;
+  border: 1px solid rgba(245, 0, 87, 0.5);
+}
+.MuiButton-outlinedSecondary:hover {
+  border: 1px solid #f50057;
+  background-color: rgba(245, 0, 87, 0.08);
+}
+.MuiButton-outlinedSecondary.Mui-disabled {
+  border: 1px solid rgba(0, 0, 0, 0.26);
+}
+@media (hover: none) {
+  .MuiButton-outlinedSecondary:hover {
+    background-color: transparent;
+  }
+}
+.MuiButton-contained {
+  color: rgba(0, 0, 0, 0.87);
+  box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.2),0px 2px 2px 0px rgba(0,0,0,0.14),0px 3px 1px -2px rgba(0,0,0,0.12);
+  background-color: #e0e0e0;
+}
+.MuiButton-contained.Mui-focusVisible {
+  box-shadow: 0px 3px 5px -1px rgba(0,0,0,0.2),0px 6px 10px 0px rgba(0,0,0,0.14),0px 1px 18px 0px rgba(0,0,0,0.12);
+}
+.MuiButton-contained:active {
+  box-shadow: 0px 5px 5px -3px rgba(0,0,0,0.2),0px 8px 10px 1px rgba(0,0,0,0.14),0px 3px 14px 2px rgba(0,0,0,0.12);
+}
+.MuiButton-contained.Mui-disabled {
+  color: rgba(0, 0, 0, 0.26);
+  box-shadow: none;
+  background-color: rgba(0, 0, 0, 0.12);
+}
+.MuiButton-contained:hover {
+  background-color: #d5d5d5;
+}
+@media (hover: none) {
+  .MuiButton-contained:hover {
+    background-color: #e0e0e0;
+  }
+}
+.MuiButton-contained:hover.Mui-disabled {
+  background-color: rgba(0, 0, 0, 0.12);
+}
+.MuiButton-containedPrimary {
+  color: #fff;
+  background-color: #3f51b5;
+}
+.MuiButton-containedPrimary:hover {
+  background-color: #303f9f;
+}
+@media (hover: none) {
+  .MuiButton-containedPrimary:hover {
+    background-color: #3f51b5;
+  }
+}
+.MuiButton-containedSecondary {
+  color: #fff;
+  background-color: #f50057;
+}
+.MuiButton-containedSecondary:hover {
+  background-color: #c51162;
+}
+@media (hover: none) {
+  .MuiButton-containedSecondary:hover {
+    background-color: #f50057;
+  }
+}
+.MuiButton-colorInherit {
+  color: inherit;
+  border-color: currentColor;
+}
+.MuiButton-sizeSmall {
+  padding: 4px 8px;
+  font-size: 0.8125rem;
+}
+.MuiButton-sizeLarge {
+  padding: 8px 24px;
+  font-size: 0.9375rem;
+}
+.MuiButton-fullWidth {
+  width: 100%;
+}
+</style><style data-jss="" data-meta="makeStyles">
+.jss1 {
+  color: #ffffff;
+  margin: 8px 4px 8px 0;
+  padding: 7px 0;
+  background: #00A7E5;
+  line-height: 12px;
+  text-transform: none;
+}
+.jss1:hover {
+  filter: brightness(96%);
+}
+.jss2 {
+  color: #ffffff;
+  margin: 8px 0;
+  padding: 7px 0;
+  background: #00A7E5;
+  line-height: 12px;
+  text-transform: none;
+}
+.jss2:hover {
+  filter: brightness(96%);
+}
+.jss3 {
+  color: #ffffff;
+  margin: 8px 8px 8px 12px;
+  padding: 7px 8px 7px 8px;
+  background: #00A7E5;
+  line-height: 12px;
+  text-transform: none;
+}
+.jss3:hover {
+  filter: brightness(96%);
+}
+.jss4 {
+  color: #ffffff;
+  margin: 8px 0 8px 8px;
+  padding: 7px 8px 7px 8px;
+  background: #00A7E5;
+  line-height: 12px;
+  text-transform: none;
+}
+.jss4:hover {
+  filter: brightness(96%);
+}
+</style><style data-jss="" data-meta="MuiFormControl">
+.MuiFormControl-root {
+  border: 0;
+  margin: 0;
+  display: inline-flex;
+  padding: 0;
+  position: relative;
+  min-width: 0;
+  flex-direction: column;
+  vertical-align: top;
+}
+.MuiFormControl-marginNormal {
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+.MuiFormControl-marginDense {
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+.MuiFormControl-fullWidth {
+  width: 100%;
+}
+</style><style data-jss="" data-meta="MuiTextField">
+
+</style><style data-jss="" data-meta="makeStyles">
+.jss5 {
+  left: -8px;
+  position: relative;
+  margin-top: 6px;
+  flex-direction: row;
+}
+.jss6 {
+  margin: 2px;
+}
+.jss7 {
+  padding: 2px 7px;
+  font-size: 20px;
+  font-family: "Inter", sans-serif;
+  text-overflow: ellipsis;
+}
+.jss8 {
+  margin: auto 0px auto 6px;
+  padding: 0px;
+}
+.jss9 {
+  font-size: 20px;
+  visibility: hidden;
+  margin-left: 8px;
+  white-space: nowrap;
+  text-overflow: clip;
+}
+</style><script id="google-recaptcha-v3" src="https://www.google.com/recaptcha/api.js?render=6LcVUOAUAAAAAP8nMSGuW46uJC5Zf6-PCYKN5xxv"></script><style data-react-tooltip="true">.__react_component_tooltip {
+  border-radius: 3px;
+  display: inline-block;
+  font-size: 13px;
+  left: -999em;
+  opacity: 0;
+  padding: 8px 21px;
+  position: fixed;
+  pointer-events: none;
+  transition: opacity 0.3s ease-out;
+  top: -999em;
+  visibility: hidden;
+  z-index: 999;
+}
+.__react_component_tooltip.allow_hover, .__react_component_tooltip.allow_click {
+  pointer-events: auto;
+}
+.__react_component_tooltip::before, .__react_component_tooltip::after {
+  content: "";
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+.__react_component_tooltip.show {
+  opacity: 0.9;
+  margin-top: 0;
+  margin-left: 0;
+  visibility: visible;
+}
+.__react_component_tooltip.place-top::before {
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  bottom: -8px;
+  left: 50%;
+  margin-left: -10px;
+}
+.__react_component_tooltip.place-bottom::before {
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  top: -8px;
+  left: 50%;
+  margin-left: -10px;
+}
+.__react_component_tooltip.place-left::before {
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  right: -8px;
+  top: 50%;
+  margin-top: -5px;
+}
+.__react_component_tooltip.place-right::before {
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  left: -8px;
+  top: 50%;
+  margin-top: -5px;
+}
+.__react_component_tooltip .multi-line {
+  display: block;
+  padding: 2px 0;
+  text-align: center;
+}</style><style id="detectElementResize" type="text/css">@keyframes resizeanim { from { opacity: 0; } to { opacity: 0; } } .resize-triggers { animation: 1ms resizeanim; visibility: hidden; opacity: 0; } .resize-triggers, .resize-triggers > div, .contract-trigger:before { content: " "; display: block; position: absolute; top: 0; left: 0; height: 100%; width: 100%; overflow: hidden; z-index: -1; } .resize-triggers > div { background: #eee; overflow: auto; } .contract-trigger:before { width: 200%; height: 200%; }</style><link id="dynamic-favicon" rel="shortcut icon" href="https://www.kaggle.com/favicon.ico"></head><body class=""><div id="root"><div style="--mdc-theme-on-primary:#fff; --mdc-theme-on-surface:rgba(0, 0, 0, 0.87); --mdc-theme-text-primary-on-background:rgba(0, 0, 0, 0.87); --mdc-theme-text-secondary-on-background:rgba(0, 0, 0, 0.54); --mdc-theme-text-hint-on-background:rgba(0, 0, 0, 0.38); --mdc-theme-text-disabled-on-background:rgba(0, 0, 0, 0.38); --mdc-theme-text-icon-on-background:rgba(0, 0, 0, 0.38); --mdc-theme-primary:#20BEFF; --mdc-theme-error:#F58B8A; --mdc-theme-background:#F8F8F8; --mdc-theme-surface:#fff; --mdc-theme-primary-bg:#20BEFF; --mdc-theme-secondary-bg:#919294;"><div tabindex="-1" style="outline: none; height: inherit;"><div aria-live="assertive" aria-atomic="true" aria-hidden="true" class="sc-dhWmbD cbgiTp mdc-snackbar mdc-snackbar--leading"><div class="mdc-snackbar__surface"><div role="status" aria-live="polite" class="mdc-snackbar__label"><div style="display: none;"></div></div><div class="mdc-snackbar__actions"></div></div></div><div class="sc-fyjqAk sc-hYIrvc fBNjwk fwXsZn"><div class="sc-hKiEVl iEOpyR"><div class="sc-dTSzeu krkYvd"><div class="sc-htmcrh dEAiVW"><button aria-label="menu" class="sc-jSFjdj iMZsEG google-material-icons">menu</button></div><a href="https://www.kaggle.com/ssyyhwg/transformers/edit#site-content" class="sc-jlZJtj QgNfY">Skip to<br>content</a><div class="sc-cbeScs gVreXZ"><a href="https://www.kaggle.com/"><img src="./如何生成文本：使用不同的解码方法通过 Transformers 生成语言 _ Kaggle_files/site-logo.png" alt="Kaggle" class="sc-ljsmAU jFDlvU"></a></div></div><div class="sc-cGKJhA fTwFWY"><div class="sc-JsfZP jfHbDg"><div class="sc-kTCsyW fBlwjg"><div class="sc-flUlpA ialjKz"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm sc-irKDMX bptyfe">search</i><input placeholder="Search" aria-label="Search" class="sc-eXuyPJ cHIuyC" value=""></div></div></div><ul class="km-list"><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-dSnXvR dnOdJJ"><a class="sc-khIgEk hQhHpX" href="https://www.kaggle.com/"><i emphasis="low" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy yTsEt sc-hYRTwp iRaesw">explore</i><p class="sc-hHEiqL sc-dlMDgC kKuVBj kpPvTx" style="padding-left: 20px;">Home</p></a></div></li><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-dSnXvR dnOdJJ"><a class="sc-khIgEk hQhHpX" href="https://www.kaggle.com/competitions"><i emphasis="low" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy yTsEt sc-hYRTwp iRaesw">emoji_events</i><p class="sc-hHEiqL sc-dlMDgC kKuVBj kpPvTx" style="padding-left: 20px;">Competitions</p></a></div></li><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-dSnXvR dnOdJJ"><a class="sc-khIgEk hQhHpX" href="https://www.kaggle.com/datasets"><i emphasis="low" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy yTsEt sc-hYRTwp iRaesw">table_chart</i><p class="sc-hHEiqL sc-dlMDgC kKuVBj kpPvTx" style="padding-left: 20px;">Datasets</p></a></div></li><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN dmJDpg sc-dSnXvR dnOdJJ"><a class="sc-khIgEk hQhHpX" href="https://www.kaggle.com/code"><i emphasis="high" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm sc-hYRTwp iRaesw">code</i><p class="sc-hHEiqL sc-dlMDgC cfjwnM kpPvTx" style="padding-left: 20px;">Code</p><div class="sc-tsGVs bumONY"></div></a></div></li><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-dSnXvR dnOdJJ"><a class="sc-khIgEk hQhHpX" href="https://www.kaggle.com/discussion"><i emphasis="low" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy yTsEt sc-hYRTwp iRaesw">comment</i><p class="sc-hHEiqL sc-dlMDgC kKuVBj kpPvTx" style="padding-left: 20px;">Discussions</p></a></div></li><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-dSnXvR dnOdJJ"><a class="sc-khIgEk hQhHpX" href="https://www.kaggle.com/learn"><i emphasis="low" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy yTsEt sc-hYRTwp iRaesw">school</i><p class="sc-hHEiqL sc-dlMDgC kKuVBj kpPvTx" style="padding-left: 20px;">Courses</p></a></div></li><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-dSnXvR dnOdJJ"><a class="sc-khIgEk hQhHpX" href="https://www.kaggle.com/ssyyhwg/transformers/edit#"><i emphasis="low" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy yTsEt sc-hYRTwp iRaesw">expand_more</i><p class="sc-hHEiqL sc-dlMDgC kKuVBj kpPvTx" style="padding-left: 20px;">More</p></a></div></li></ul></div><div class="sc-iXquSf bwRbQ"><div><div class="sc-eJocfa lbnxVK" style="margin-bottom: 24px;"></div><span class="sc-jJMGnK sc-hiKfDv sc-hkoqWr cETHsZ dRsyqq fqzycI">Recently Viewed</span><div role="list"><li aria-label="Toxic Comment Classification Challenge" class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-bShgHC cXONZo"><a class="sc-khIgEk hQhHpX" href="https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge?rvi=1" title="Toxic Comment Classification Challenge"><div class="sc-ecQkzk jxxRKP"><img src="./如何生成文本：使用不同的解码方法通过 Transformers 生成语言 _ Kaggle_files/thumb76_76.png" alt="Thumbnail for Toxic Comment Classification Challenge" class="sc-jlQhrW iHvgiu"></div><p class="sc-kfYoZR sc-fKgJPI sc-juXuNZ gpHTvJ cxbltl blTBVW">Toxic Comment Classification Challenge</p></a></div></li></div></div></div></div><div class="sc-exqIPC leuDbu"><div class="mdc-menu-surface--anchor"><button class="sc-dfUaia jcywVe"><div class="sc-cUZYnF bGVApN"><i emphasis="high" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm sc-lndvYQ gaJHBk">auto_awesome_motion</i><div color="#FAE041" class="sc-hZwEmZ cOYELl">1</div></div><p class="sc-hHEiqL sc-dlMDgC sc-hCJzQj kKuVBj kpPvTx dXhrXr">View Active Events</p></button></div></div></div><div class="sc-bKgkGg iTkrxB"><div class="sc-ggVKop DQRTy"><div class="sc-dTSzeu krkYvd"><div class="sc-htmcrh dEAiVW"><button aria-label="menu" class="sc-jSFjdj iMZsEG google-material-icons">menu</button></div><a href="https://www.kaggle.com/ssyyhwg/transformers/edit#site-content" class="sc-jlZJtj QgNfY">Skip to<br>content</a><div class="sc-cbeScs gVreXZ"><a href="https://www.kaggle.com/"><img src="./如何生成文本：使用不同的解码方法通过 Transformers 生成语言 _ Kaggle_files/site-logo.png" alt="Kaggle" class="sc-ljsmAU jFDlvU"></a></div></div></div><div class="sc-cGKJhA fTwFWY"><div class="sc-JsfZP jfHbDg"><div class="sc-kTCsyW fBlwjg"><div class="sc-flUlpA ialjKz"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm sc-irKDMX bptyfe">search</i><input placeholder="Search" aria-label="Search" class="sc-eXuyPJ cHIuyC" value=""></div></div></div><ul class="km-list"><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-dSnXvR dnOdJJ"><a class="sc-khIgEk hQhHpX" href="https://www.kaggle.com/"><i emphasis="low" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy yTsEt sc-hYRTwp iRaesw">explore</i><p class="sc-hHEiqL sc-dlMDgC kKuVBj kpPvTx" style="padding-left: 20px;">Home</p></a></div></li><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-dSnXvR dnOdJJ"><a class="sc-khIgEk hQhHpX" href="https://www.kaggle.com/competitions"><i emphasis="low" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy yTsEt sc-hYRTwp iRaesw">emoji_events</i><p class="sc-hHEiqL sc-dlMDgC kKuVBj kpPvTx" style="padding-left: 20px;">Competitions</p></a></div></li><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-dSnXvR dnOdJJ"><a class="sc-khIgEk hQhHpX" href="https://www.kaggle.com/datasets"><i emphasis="low" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy yTsEt sc-hYRTwp iRaesw">table_chart</i><p class="sc-hHEiqL sc-dlMDgC kKuVBj kpPvTx" style="padding-left: 20px;">Datasets</p></a></div></li><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN dmJDpg sc-dSnXvR dnOdJJ"><a class="sc-khIgEk hQhHpX" href="https://www.kaggle.com/code"><i emphasis="high" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm sc-hYRTwp iRaesw">code</i><p class="sc-hHEiqL sc-dlMDgC cfjwnM kpPvTx" style="padding-left: 20px;">Code</p><div class="sc-tsGVs bumONY"></div></a></div></li><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-dSnXvR dnOdJJ"><a class="sc-khIgEk hQhHpX" href="https://www.kaggle.com/discussion"><i emphasis="low" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy yTsEt sc-hYRTwp iRaesw">comment</i><p class="sc-hHEiqL sc-dlMDgC kKuVBj kpPvTx" style="padding-left: 20px;">Discussions</p></a></div></li><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-dSnXvR dnOdJJ"><a class="sc-khIgEk hQhHpX" href="https://www.kaggle.com/learn"><i emphasis="low" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy yTsEt sc-hYRTwp iRaesw">school</i><p class="sc-hHEiqL sc-dlMDgC kKuVBj kpPvTx" style="padding-left: 20px;">Courses</p></a></div></li><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-dSnXvR dnOdJJ"><a class="sc-khIgEk hQhHpX" href="https://www.kaggle.com/ssyyhwg/transformers/edit#"><i emphasis="low" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy yTsEt sc-hYRTwp iRaesw">expand_more</i><p class="sc-hHEiqL sc-dlMDgC kKuVBj kpPvTx" style="padding-left: 20px;">More</p></a></div></li></ul></div><div><div class="sc-eJocfa lbnxVK" style="margin-bottom: 24px;"></div><span class="sc-jJMGnK sc-hiKfDv sc-hkoqWr cETHsZ dRsyqq fqzycI">Recently Viewed</span><div role="list"><li aria-label="Toxic Comment Classification Challenge" class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-bShgHC cXONZo"><a class="sc-khIgEk hQhHpX" href="https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge?rvi=1" title="Toxic Comment Classification Challenge"><div class="sc-ecQkzk jxxRKP"><img src="./如何生成文本：使用不同的解码方法通过 Transformers 生成语言 _ Kaggle_files/thumb76_76.png" alt="Thumbnail for Toxic Comment Classification Challenge" class="sc-jlQhrW iHvgiu"></div><p class="sc-kfYoZR sc-fKgJPI sc-juXuNZ gpHTvJ cxbltl blTBVW">Toxic Comment Classification Challenge</p></a></div></li></div></div><div class="sc-eJocfa lbnxVK"></div><div class="mdc-menu-surface--anchor"><button class="sc-dfUaia jcywVe"><div class="sc-cUZYnF bGVApN"><i emphasis="high" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm sc-lndvYQ gaJHBk">auto_awesome_motion</i><div color="#FAE041" class="sc-hZwEmZ cOYELl">1</div></div><p class="sc-hHEiqL sc-dlMDgC sc-hCJzQj kKuVBj kpPvTx dXhrXr">View Active Events</p></button></div></div><div data-testid="searchContainer" class="sc-gfPeNv idgTJU"><div></div><div class="sc-liIFw fgWydl"><div></div></div></div><div id="site-content" class="sc-eiQWpL cGvOeO"><div class="sc-dkiSSI ibkFXD"></div><div data-testid="notebook-editor-render-tid" class="AppView--16eb2j kMYsPa"><div class="Header_Body--rbwidn dudGCa"><div></div><div class="Header_MainHeader--uoui3c bwjhpx"><div class="Header_MenuIconWrapper--izyttq hRjeVx"><button aria-label="menu" class="sc-jSFjdj iMZsEG google-material-icons">menu</button></div><div class="Header_MenuWrapper--19vw76b cUqOsr"><div class="Header_TitleWrapper--qrpum5 gzVOKw"><div class="MuiFormControl-root jss5" aria-describedby="component-error-text"><div class="TitleInput_ShrinkingTitleWrapper--163ctwl eDeLye"><div class="TitleInput_TextFieldWrapper--1dch7vu eVWhhG"><div class="MuiFormControl-root MuiTextField-root sc-SBXVS gfPboA jss6 MuiFormControl-fullWidth"><div class="MuiInputBase-root MuiInput-root MuiInputBase-fullWidth MuiInput-fullWidth MuiInputBase-formControl MuiInput-formControl"><input aria-invalid="false" autocomplete="off" class="MuiInputBase-input MuiInput-input jss7" id="notebook-title-input" type="text" maxlength="50" value="如何生成文本：使用不同的解码方法通过 Transformers 生成语言"></div></div></div><div class="jss9">如何生成文本：使用不同的解码方法通过 Transformers 生成语言_</div></div></div><div class="SaveStatus_Body--1fefpx ccmZEx">Draft saved</div></div><div class="Header_MenuBarWrapper--ebv0r9 fFpNML"><div class="EditorMenuBar_Body--5mokqd kTRSnY"><button class="MuiButtonBase-root MuiButton-root sc-jnypIX gTWwit MuiButton-text" tabindex="0" type="button"><span class="MuiButton-label">File</span></button><button class="MuiButtonBase-root MuiButton-root sc-jnypIX gTWwit MuiButton-text" tabindex="0" type="button"><span class="MuiButton-label">Edit</span></button><button class="MuiButtonBase-root MuiButton-root sc-jnypIX gTWwit MuiButton-text" tabindex="0" type="button"><span class="MuiButton-label">View</span></button><button class="MuiButtonBase-root MuiButton-root sc-jnypIX gTWwit MuiButton-text" tabindex="0" type="button"><span class="MuiButton-label">Run</span></button><button class="MuiButtonBase-root MuiButton-root sc-jnypIX gTWwit MuiButton-text" tabindex="0" type="button"><span class="MuiButton-label">Add-ons</span></button><button class="MuiButtonBase-root MuiButton-root sc-jnypIX gTWwit MuiButton-text" tabindex="0" type="button"><span class="MuiButton-label">Help</span></button></div></div></div><div class="ShareButton_ButtonWrapper--asiu8k gWYNZf"><button class="sc-EZqKI kgDOZu ShareButton_StyledButton--1ewahb4 hrZYny" tabindex="0" role="button"><i color="#202124" sizevalue="18px" class="rmwc-icon google-material-icons sc-gKAaRy iExUpp">people</i><span class="sc-kLojOw sc-iklJeh eGLYxv hbusih">Share</span></button></div><div class="sc-eVSbpq hjZydH"><div class="sc-oeezt cIOdML" data-tip="true" data-for="tooltip_components_4160c619-38bd-4243-96c0-887fa90dea1f" currentitem="false" style="vertical-align: top;"><button class="sc-EZqKI bGdNGQ sc-tXrMc cRVMyC" tabindex="0" role="button"><i color="#FFFFFF" sizevalue="18px" class="rmwc-icon google-material-icons sc-gKAaRy eoZVBq">update</i><span class="sc-kLojOw sc-iklJeh eGLYxv hbusih">Save Version</span></button><div class="__react_component_tooltip t605c6502-a024-4a36-bcca-c2e4b3618d04 place-bottom type-dark" id="tooltip_components_4160c619-38bd-4243-96c0-887fa90dea1f" data-id="tooltip" style="left: 1374px; top: 52px;"><style aria-hidden="true">
+  	.t605c6502-a024-4a36-bcca-c2e4b3618d04 {
+	    color: #fff;
+	    background: #222;
+	    border: 1px solid transparent;
+  	}
+
+  	.t605c6502-a024-4a36-bcca-c2e4b3618d04.place-top {
+        margin-top: -10px;
+    }
+    .t605c6502-a024-4a36-bcca-c2e4b3618d04.place-top::before {
+        border-top: 8px solid transparent;
+    }
+    .t605c6502-a024-4a36-bcca-c2e4b3618d04.place-top::after {
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        bottom: -6px;
+        left: 50%;
+        margin-left: -8px;
+        border-top-color: #222;
+        border-top-style: solid;
+        border-top-width: 6px;
+    }
+
+    .t605c6502-a024-4a36-bcca-c2e4b3618d04.place-bottom {
+        margin-top: 10px;
+    }
+    .t605c6502-a024-4a36-bcca-c2e4b3618d04.place-bottom::before {
+        border-bottom: 8px solid transparent;
+    }
+    .t605c6502-a024-4a36-bcca-c2e4b3618d04.place-bottom::after {
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        top: -6px;
+        left: 50%;
+        margin-left: -8px;
+        border-bottom-color: #222;
+        border-bottom-style: solid;
+        border-bottom-width: 6px;
+    }
+
+    .t605c6502-a024-4a36-bcca-c2e4b3618d04.place-left {
+        margin-left: -10px;
+    }
+    .t605c6502-a024-4a36-bcca-c2e4b3618d04.place-left::before {
+        border-left: 8px solid transparent;
+    }
+    .t605c6502-a024-4a36-bcca-c2e4b3618d04.place-left::after {
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        right: -6px;
+        top: 50%;
+        margin-top: -4px;
+        border-left-color: #222;
+        border-left-style: solid;
+        border-left-width: 6px;
+    }
+
+    .t605c6502-a024-4a36-bcca-c2e4b3618d04.place-right {
+        margin-left: 10px;
+    }
+    .t605c6502-a024-4a36-bcca-c2e4b3618d04.place-right::before {
+        border-right: 8px solid transparent;
+    }
+    .t605c6502-a024-4a36-bcca-c2e4b3618d04.place-right::after {
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        left: -6px;
+        top: 50%;
+        margin-top: -4px;
+        border-right-color: #222;
+        border-right-style: solid;
+        border-right-width: 6px;
+    }
+  </style><div class="sc-hhIiOg eBGMfa">Save a new version of your work.</div></div></div><div class="sc-oeezt cIOdML" data-tip="true" data-for="tooltip_components_19eecb5b-07a9-42de-9ee0-8f3e1d029483" currentitem="false" style="vertical-align: top;"><button class="sc-EZqKI vMBwD sc-iOTJzh QCSvb" tabindex="0" role="button"><span class="sc-kLojOw sc-iklJeh eGLYxv hbusih">1</span></button><div class="__react_component_tooltip tacf25d62-eb05-42ae-9f22-ae64dc499fb2 place-bottom type-dark" id="tooltip_components_19eecb5b-07a9-42de-9ee0-8f3e1d029483" data-id="tooltip" style="left: 1517px; top: 52px;"><style aria-hidden="true">
+  	.tacf25d62-eb05-42ae-9f22-ae64dc499fb2 {
+	    color: #fff;
+	    background: #222;
+	    border: 1px solid transparent;
+  	}
+
+  	.tacf25d62-eb05-42ae-9f22-ae64dc499fb2.place-top {
+        margin-top: -10px;
+    }
+    .tacf25d62-eb05-42ae-9f22-ae64dc499fb2.place-top::before {
+        border-top: 8px solid transparent;
+    }
+    .tacf25d62-eb05-42ae-9f22-ae64dc499fb2.place-top::after {
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        bottom: -6px;
+        left: 50%;
+        margin-left: -8px;
+        border-top-color: #222;
+        border-top-style: solid;
+        border-top-width: 6px;
+    }
+
+    .tacf25d62-eb05-42ae-9f22-ae64dc499fb2.place-bottom {
+        margin-top: 10px;
+    }
+    .tacf25d62-eb05-42ae-9f22-ae64dc499fb2.place-bottom::before {
+        border-bottom: 8px solid transparent;
+    }
+    .tacf25d62-eb05-42ae-9f22-ae64dc499fb2.place-bottom::after {
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        top: -6px;
+        left: 50%;
+        margin-left: -8px;
+        border-bottom-color: #222;
+        border-bottom-style: solid;
+        border-bottom-width: 6px;
+    }
+
+    .tacf25d62-eb05-42ae-9f22-ae64dc499fb2.place-left {
+        margin-left: -10px;
+    }
+    .tacf25d62-eb05-42ae-9f22-ae64dc499fb2.place-left::before {
+        border-left: 8px solid transparent;
+    }
+    .tacf25d62-eb05-42ae-9f22-ae64dc499fb2.place-left::after {
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        right: -6px;
+        top: 50%;
+        margin-top: -4px;
+        border-left-color: #222;
+        border-left-style: solid;
+        border-left-width: 6px;
+    }
+
+    .tacf25d62-eb05-42ae-9f22-ae64dc499fb2.place-right {
+        margin-left: 10px;
+    }
+    .tacf25d62-eb05-42ae-9f22-ae64dc499fb2.place-right::before {
+        border-right: 8px solid transparent;
+    }
+    .tacf25d62-eb05-42ae-9f22-ae64dc499fb2.place-right::after {
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        left: -6px;
+        top: 50%;
+        margin-top: -4px;
+        border-right-color: #222;
+        border-right-style: solid;
+        border-right-width: 6px;
+    }
+  </style><div class="sc-hhIiOg eBGMfa">Show versions</div></div></div></div><div class="Header_ToggleSidebarWrapper--1lxmrkg byiRBQ"><button aria-label="Toggle sidebar visibility" title="Toggle sidebar visibility" class="sc-jSFjdj iMZsEG google-material-icons">last_page</button></div></div></div><div class="App_Body--16c8j4p lpnlFZ"><div class="Layout_Body--6piylv eLqbAs"><div mode="column" class="Layout_BodyInner--61tklw knSkgK"><div class="Pane--1eb69nk hloyDn"><div class="LayoutContainer_Body--1ulzvo jVOLJP"><div class="ToolbarContainer_Body--2h8iu7 fawSZq"><div class="ToolbarActionsLeft_Body--gd13f davHcm"><button class="sc-dqFsfS ToolbarAction_Body--ybo8q3 bmFkzh gOgLXo" title="Add cell"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm">add</i></button><button class="sc-dqFsfS ToolbarAction_Body--ybo8q3 bmFkzh gOgLXo" title="Delete cell"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm">delete</i></button><div class="ToolbarActionsLeft_ToolbarSeparator--1jmle0q hIIyeY"></div><button class="sc-dqFsfS ToolbarAction_Body--ybo8q3 bmFkzh gOgLXo" title="Cut cell"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm">content_cut</i></button><button class="sc-dqFsfS ToolbarAction_Body--ybo8q3 bmFkzh gOgLXo" title="Copy cell"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm">content_copy</i></button><button class="sc-dqFsfS ToolbarAction_Body--ybo8q3 bmFkzh gOgLXo" title="Paste cell"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm">content_paste</i></button><div class="ToolbarActionsLeft_ToolbarSeparator--1jmle0q hIIyeY"></div><button class="sc-dqFsfS ToolbarAction_Body--ybo8q3 bmFkzh gOgLXo" title="Run current cell"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm">play_arrow</i></button><button class="sc-dqFsfS ToolbarAction_Body--ybo8q3 bmFkzh gOgLXo labeled" title="Run all"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm">fast_forward</i><div class="ToolbarAction_Label--1qf3dyz iWBQbB">Run All</div></button><div class="ToolbarActionsLeft_ToolbarSeparator--1jmle0q hIIyeY"></div><div class="mdc-menu-surface--anchor"><button class="sc-EZqKI iAregl" tabindex="0" role="button"><span class="sc-kLojOw sc-iklJeh eGLYxv hbusih">Code</span><i color="#202124" sizevalue="18px" class="rmwc-icon google-material-icons sc-gKAaRy iExUpp">arrow_drop_down</i></button></div></div><div class="ToolbarContainer_Spacer--oz7wcc gAuMab"></div><button class="sc-dqFsfS Status_Body--15eqbxr bmFkzh dKHZQS"><div class="SessionStatusIndicator_Body--iyymxk eRtexG"><div class="SessionStatusIndicator_StatusLeft--106w180 kNYsnn"><i color="#42E3BB" sizevalue="1.125em" title="Running" verticalalign="-0.125em" class="rmwc-icon google-material-icons sc-gKAaRy byRrGX">circle</i><div class="SessionStatusIndicator_StatusTitle--10lqtkn hEtyoP">Draft Session</div></div><div class="SessionStatusIndicator_TimerBody--g3ej6t ktXQXv">(1m)</div></div><div title="Disk Space Usage" class="sc-bhrzfF bPHARW"><div class="sc-cdxCiY bZuUE">HDD</div><div class="sc-kLDuD gxAqPO"><div value="46190592" max="21003583488" class="sc-bgRGxW cJaYAa"></div></div></div><div class="Status_MenuSeparator--p0dmmg hSREhc"></div><div title="CPU Usage" class="sc-bhrzfF bPHARW"><div class="sc-cdxCiY bZuUE">CPU</div><div class="sc-kLDuD gxAqPO"><div value="0" max="100" class="sc-bgRGxW iEFVDC"></div></div></div><div class="Status_MenuSeparator--p0dmmg hSREhc"></div><div title="RAM Usage" class="sc-bhrzfF bPHARW"><div class="sc-cdxCiY bZuUE">RAM</div><div class="sc-kLDuD gxAqPO"><div value="251260928" max="17179869184" class="sc-bgRGxW gjECAw"></div></div></div></button><div class="ToolbarActionsRight_Body--1muxuky hIJZRc"><button class="sc-dqFsfS ToolbarAction_Body--ybo8q3 bmFkzh gOgLXo" title="Stop session"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm">power_settings_new</i></button><button class="sc-dqFsfS ToolbarAction_Body--ybo8q3 bmFkzh gOgLXo" title="Factory reset"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm">loop</i></button><button class="sc-dqFsfS ToolbarAction_Body--ybo8q3 bmFkzh gOgLXo" title="More"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm">more_vert</i></button></div></div><div class="Editor_Body--1bhm27d khCcvg"><div class="sc-DhIVs bMCyww"></div><div class="SessionlessEditor_FrameContainer--1qf26to kLqJVm" style="display: flex;"><iframe name="" class="" src="./如何生成文本：使用不同的解码方法通过 Transformers 生成语言 _ Kaggle_files/jupyterlab-index-1e64aa725cae6216d386.html"></iframe></div><div aria-live="assertive" aria-atomic="true" aria-hidden="true" class="sc-dhWmbD cbgiTp mdc-snackbar mdc-snackbar--leading"><div class="mdc-snackbar__surface"><div role="status" aria-live="polite" class="mdc-snackbar__label"><div style="display: none;"></div></div><div class="mdc-snackbar__actions"></div></div></div></div><div class="sc-eiOTMl fLORXb ProgressSnackbarContainer_ProgressSnackbarWrapper--avjqt1 frfaIc"><div class="sc-hepHJq gZprqq"><div _size="xlarge" class="rmwc-circular-progress rmwc-circular-progress--size-xlarge rmwc-circular-progress--indeterminate rmwc-circular-progress--thickerstroke"><svg class="rmwc-circular-progress__circle" viewBox="0 0 48 48"><circle class="rmwc-circular-progress__path" cx="24" cy="24" r="20"></circle></svg></div></div><div class="sc-jVBfSZ eDSbxJ"><div class="sc-hemfWc ebfNDY">Creating Save &amp; Run All Version</div><div class="sc-cTmXAz cwbQFF"></div></div><div class="sc-bXXDC injjUJ"></div><div class="sc-QfGIp hNwnuN"><button aria-label="close" class="sc-jSFjdj iMZsEG sc-jomqko iIhzZx google-material-icons">close</button><button class="sc-EZqKI bGHMMK" tabindex="0" role="button"><span class="sc-kLojOw sc-iklJeh eGLYxv hbusih">Stop</span></button></div></div></div></div></div></div><div class="Sidebar_Body--14r4g35 krYMPd"><div class="sc-iQTVEV kZOgXZ" style="position: relative; flex-basis: 300px; display: flex; flex-direction: row; max-height: 100%; height: 100%;"><div direction="horizontal" class="sc-jMZYIo ixutJJ"><div role="separator" aria-orientation="horizontal"></div></div><div style="width: 300px;"><div class="Sidebar_ScrollableArea--1i9c81d HsZor"><div class="SidebarPane_Body--1owv1gk hobDGk"><div role="button" class="SidebarPane_ItemHeader--13ydw5o jmOAMS"><div class="SidebarPane_TitleWrapper--1mt9ft2 hKOChs">Data</div><div class="SidebarPane_ButtonWrapper--1siykkc fvXTbe"><button class="sc-EZqKI bVFsBN" tabindex="0" role="button"><i color="#202124" sizevalue="18px" class="rmwc-icon google-material-icons sc-gKAaRy iExUpp">add</i><span class="sc-kLojOw sc-iklJeh eGLYxv hbusih">Add data</span></button></div><div class="SidebarPane_ChevronWrapper--qm9hj3 jkhhYy"><button class="MuiButtonBase-root MuiIconButton-root jss94" tabindex="0" type="button" title="Collapse Data box" style="float: right;"><span class="MuiIconButton-label"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm">keyboard_arrow_up</i></span><span class="MuiTouchRipple-root"></span></button></div></div><div class="SidebarPane_ItemBody--tqtqts fPzlkM"><div class="DatasetsWidget_Body--vtd0he okuaQ"><div class="sc-hzyZDe fScNWU"><div class="sc-ktvWjP iJaGja"><div class="sc-fxFQKN dPxUhZ"><i sizevalue="18px" class="rmwc-icon google-material-icons sc-gKAaRy iExUpp">folder</i></div><p class="sc-kfYoZR sc-fKgJPI sc-cjzNjn jaxPpm cxbltl dbLvlr">input</p></div><ul class="sc-gVCZRN iiBEWx"></ul></div><div class="sc-hzyZDe fScNWU"><div class="sc-ktvWjP iJaGja"><div class="sc-fxFQKN dPxUhZ"><i sizevalue="18px" class="rmwc-icon google-material-icons sc-gKAaRy iExUpp">folder</i></div><p class="sc-kfYoZR sc-fKgJPI sc-cjzNjn jaxPpm cxbltl dbLvlr">output (44.1MB / 19.6GB)</p></div><ul class="sc-gVCZRN iiBEWx"><ul class="sc-ksLacT ciHZNq"><div role="button" class="sc-ktvWjP sc-hrnFwn iJaGja bUoZAT"><div class="sc-bFSbwS cNCJLo"><i sizevalue="18px" class="rmwc-icon google-material-icons sc-gKAaRy iExUpp">arrow_right</i></div><div class="sc-fxFQKN dPxUhZ"><i sizevalue="18px" class="rmwc-icon google-material-icons sc-gKAaRy iExUpp">folder</i></div><div class="sc-intIzG isPSSz"><div class="sc-oeezt cIOdML sc-igOmtu bDNEth" data-tip="true" data-for="tooltip_components_93a4cf7f-de32-440e-9d94-79bbd48f113f" currentitem="false"><p class="sc-kfYoZR sc-fKgJPI sc-cjzNjn jaxPpm cxbltl dbLvlr">/kaggle/working</p><div class="__react_component_tooltip ta2a39420-70c3-4745-b22f-09335f378eeb place-top type-dark" id="tooltip_components_93a4cf7f-de32-440e-9d94-79bbd48f113f" data-id="tooltip" style="left: 1394px; top: 123px;"><style aria-hidden="true">
+  	.ta2a39420-70c3-4745-b22f-09335f378eeb {
+	    color: #fff;
+	    background: #222;
+	    border: 1px solid transparent;
+  	}
+
+  	.ta2a39420-70c3-4745-b22f-09335f378eeb.place-top {
+        margin-top: -10px;
+    }
+    .ta2a39420-70c3-4745-b22f-09335f378eeb.place-top::before {
+        border-top: 8px solid transparent;
+    }
+    .ta2a39420-70c3-4745-b22f-09335f378eeb.place-top::after {
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        bottom: -6px;
+        left: 50%;
+        margin-left: -8px;
+        border-top-color: #222;
+        border-top-style: solid;
+        border-top-width: 6px;
+    }
+
+    .ta2a39420-70c3-4745-b22f-09335f378eeb.place-bottom {
+        margin-top: 10px;
+    }
+    .ta2a39420-70c3-4745-b22f-09335f378eeb.place-bottom::before {
+        border-bottom: 8px solid transparent;
+    }
+    .ta2a39420-70c3-4745-b22f-09335f378eeb.place-bottom::after {
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        top: -6px;
+        left: 50%;
+        margin-left: -8px;
+        border-bottom-color: #222;
+        border-bottom-style: solid;
+        border-bottom-width: 6px;
+    }
+
+    .ta2a39420-70c3-4745-b22f-09335f378eeb.place-left {
+        margin-left: -10px;
+    }
+    .ta2a39420-70c3-4745-b22f-09335f378eeb.place-left::before {
+        border-left: 8px solid transparent;
+    }
+    .ta2a39420-70c3-4745-b22f-09335f378eeb.place-left::after {
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        right: -6px;
+        top: 50%;
+        margin-top: -4px;
+        border-left-color: #222;
+        border-left-style: solid;
+        border-left-width: 6px;
+    }
+
+    .ta2a39420-70c3-4745-b22f-09335f378eeb.place-right {
+        margin-left: 10px;
+    }
+    .ta2a39420-70c3-4745-b22f-09335f378eeb.place-right::before {
+        border-right: 8px solid transparent;
+    }
+    .ta2a39420-70c3-4745-b22f-09335f378eeb.place-right::after {
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        left: -6px;
+        top: 50%;
+        margin-top: -4px;
+        border-right-color: #222;
+        border-right-style: solid;
+        border-right-width: 6px;
+    }
+  </style><div class="sc-hhIiOg eBGMfa">/kaggle/working (1 directories)</div></div></div></div><div class="sc-eQlIoA gmlEDn"><div class="sc-ddIsst gjcLUR"><div class="sc-fhnvib hwbCCJ"><div class="sc-oeezt cIOdML" data-tip="true" data-for="tooltip_components_57952016-9434-45ae-91e3-81cb02ea224d" currentitem="false"><div role="button" class="sc-gdtylu dSCptI"><i sizevalue="18px" class="rmwc-icon google-material-icons sc-gKAaRy iExUpp">content_copy</i></div><div class="__react_component_tooltip t6dfb468d-e336-42b4-80f3-7681f61985d1 place-top type-dark" id="tooltip_components_57952016-9434-45ae-91e3-81cb02ea224d" data-id="tooltip"><style aria-hidden="true">
+  	.t6dfb468d-e336-42b4-80f3-7681f61985d1 {
+	    color: #fff;
+	    background: #222;
+	    border: 1px solid transparent;
+  	}
+
+  	.t6dfb468d-e336-42b4-80f3-7681f61985d1.place-top {
+        margin-top: -10px;
+    }
+    .t6dfb468d-e336-42b4-80f3-7681f61985d1.place-top::before {
+        border-top: 8px solid transparent;
+    }
+    .t6dfb468d-e336-42b4-80f3-7681f61985d1.place-top::after {
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        bottom: -6px;
+        left: 50%;
+        margin-left: -8px;
+        border-top-color: #222;
+        border-top-style: solid;
+        border-top-width: 6px;
+    }
+
+    .t6dfb468d-e336-42b4-80f3-7681f61985d1.place-bottom {
+        margin-top: 10px;
+    }
+    .t6dfb468d-e336-42b4-80f3-7681f61985d1.place-bottom::before {
+        border-bottom: 8px solid transparent;
+    }
+    .t6dfb468d-e336-42b4-80f3-7681f61985d1.place-bottom::after {
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        top: -6px;
+        left: 50%;
+        margin-left: -8px;
+        border-bottom-color: #222;
+        border-bottom-style: solid;
+        border-bottom-width: 6px;
+    }
+
+    .t6dfb468d-e336-42b4-80f3-7681f61985d1.place-left {
+        margin-left: -10px;
+    }
+    .t6dfb468d-e336-42b4-80f3-7681f61985d1.place-left::before {
+        border-left: 8px solid transparent;
+    }
+    .t6dfb468d-e336-42b4-80f3-7681f61985d1.place-left::after {
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        right: -6px;
+        top: 50%;
+        margin-top: -4px;
+        border-left-color: #222;
+        border-left-style: solid;
+        border-left-width: 6px;
+    }
+
+    .t6dfb468d-e336-42b4-80f3-7681f61985d1.place-right {
+        margin-left: 10px;
+    }
+    .t6dfb468d-e336-42b4-80f3-7681f61985d1.place-right::before {
+        border-right: 8px solid transparent;
+    }
+    .t6dfb468d-e336-42b4-80f3-7681f61985d1.place-right::after {
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        left: -6px;
+        top: 50%;
+        margin-top: -4px;
+        border-right-color: #222;
+        border-right-style: solid;
+        border-right-width: 6px;
+    }
+  </style><div class="sc-hhIiOg eBGMfa">Copy file path</div></div></div></div><div class="sc-oeezt cIOdML" data-tip="true" data-for="tooltip_components_614588f5-fdc2-4b3e-8799-765cdde17184" currentitem="false"><div role="button" class="sc-gdtylu dSCptI"><i sizevalue="18px" class="rmwc-icon google-material-icons sc-gKAaRy iExUpp">sync</i></div><div class="__react_component_tooltip t9bcdceec-9962-4b98-a1e6-fa188197d273 place-top type-dark" id="tooltip_components_614588f5-fdc2-4b3e-8799-765cdde17184" data-id="tooltip"><style aria-hidden="true">
+  	.t9bcdceec-9962-4b98-a1e6-fa188197d273 {
+	    color: #fff;
+	    background: #222;
+	    border: 1px solid transparent;
+  	}
+
+  	.t9bcdceec-9962-4b98-a1e6-fa188197d273.place-top {
+        margin-top: -10px;
+    }
+    .t9bcdceec-9962-4b98-a1e6-fa188197d273.place-top::before {
+        border-top: 8px solid transparent;
+    }
+    .t9bcdceec-9962-4b98-a1e6-fa188197d273.place-top::after {
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        bottom: -6px;
+        left: 50%;
+        margin-left: -8px;
+        border-top-color: #222;
+        border-top-style: solid;
+        border-top-width: 6px;
+    }
+
+    .t9bcdceec-9962-4b98-a1e6-fa188197d273.place-bottom {
+        margin-top: 10px;
+    }
+    .t9bcdceec-9962-4b98-a1e6-fa188197d273.place-bottom::before {
+        border-bottom: 8px solid transparent;
+    }
+    .t9bcdceec-9962-4b98-a1e6-fa188197d273.place-bottom::after {
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        top: -6px;
+        left: 50%;
+        margin-left: -8px;
+        border-bottom-color: #222;
+        border-bottom-style: solid;
+        border-bottom-width: 6px;
+    }
+
+    .t9bcdceec-9962-4b98-a1e6-fa188197d273.place-left {
+        margin-left: -10px;
+    }
+    .t9bcdceec-9962-4b98-a1e6-fa188197d273.place-left::before {
+        border-left: 8px solid transparent;
+    }
+    .t9bcdceec-9962-4b98-a1e6-fa188197d273.place-left::after {
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        right: -6px;
+        top: 50%;
+        margin-top: -4px;
+        border-left-color: #222;
+        border-left-style: solid;
+        border-left-width: 6px;
+    }
+
+    .t9bcdceec-9962-4b98-a1e6-fa188197d273.place-right {
+        margin-left: 10px;
+    }
+    .t9bcdceec-9962-4b98-a1e6-fa188197d273.place-right::before {
+        border-right: 8px solid transparent;
+    }
+    .t9bcdceec-9962-4b98-a1e6-fa188197d273.place-right::after {
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        left: -6px;
+        top: 50%;
+        margin-top: -4px;
+        border-right-color: #222;
+        border-right-style: solid;
+        border-right-width: 6px;
+    }
+  </style><div class="sc-hhIiOg eBGMfa">Refresh directory contents</div></div></div></div></div></div></ul></ul></div></div></div></div><div class="SidebarPane_Body--1owv1gk hobDGk"><div role="button" class="SidebarPane_ItemHeader--13ydw5o jmOAMS"><div class="SidebarPane_TitleWrapper--1mt9ft2 hKOChs">Settings</div><div class="SidebarPane_ButtonWrapper--1siykkc fvXTbe"></div><div class="SidebarPane_ChevronWrapper--qm9hj3 jkhhYy"><button class="MuiButtonBase-root MuiIconButton-root jss94" tabindex="0" type="button" title="Collapse Settings box" style="float: right;"><span class="MuiIconButton-label"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm">keyboard_arrow_up</i></span><span class="MuiTouchRipple-root"></span></button></div></div><div class="SidebarPane_ItemBody--tqtqts fPzlkM"><div class="SettingsWidget_Body--17j9ae7 gBgRwR"><div class="SettingsWidgetItem_Body--spzd3y fdDggF"><div class="SettingsWidgetItem_NameWrapper--1bijx5r kLDECw">Language</div><div class="SettingsWidgetItem_ContentWrapper--fuic0c eDXtTS"><div class="mdc-menu-surface--anchor"><button class="sc-EZqKI iAregl" tabindex="0" role="button"><span class="sc-kLojOw sc-iklJeh eGLYxv hbusih">Python</span><i color="#202124" sizevalue="18px" class="rmwc-icon google-material-icons sc-gKAaRy iExUpp">arrow_drop_down</i></button></div></div></div><div class="SettingsWidgetItem_Body--spzd3y fdDggF"><div class="SettingsWidgetItem_NameWrapper--1bijx5r kLDECw">Environment</div><div class="SettingsWidgetItem_ContentWrapper--fuic0c eDXtTS"><div class="DockerSelectorButton_ButtonWrapper--r9dyg9 fbAQhk"><button class="sc-EZqKI bGHMMK" tabindex="0" role="button"><span class="sc-kLojOw sc-iklJeh eGLYxv hbusih">Preferences</span></button></div></div></div><div class="SettingsWidgetItem_Body--spzd3y fdDggF"><div class="SettingsWidgetItem_NameWrapper--1bijx5r kLDECw">Accelerator</div><div class="SettingsWidgetItem_ContentWrapper--fuic0c eDXtTS"><div class="mdc-menu-surface--anchor"><button class="sc-EZqKI iAregl" tabindex="0" role="button"><span class="sc-kLojOw sc-iklJeh eGLYxv hbusih">None</span><i color="#202124" sizevalue="18px" class="rmwc-icon google-material-icons sc-gKAaRy iExUpp">arrow_drop_down</i></button></div></div></div><div></div><div class="SettingsWidgetItem_Body--spzd3y fdDggF"><div class="SettingsWidgetItem_NameWrapper--1bijx5r kLDECw">Internet</div><div class="SettingsWidgetItem_ContentWrapper--fuic0c eDXtTS"><div class="sc-ckXLN gOFxRq" style="margin-left: 24px;"><div class="sc-iArHnM eZzCtJ"><div class="sc-fzJAIQ feQYYL"></div><div class="sc-bHCRaJ gDdYIa"><i sizevalue="18px" class="rmwc-icon google-material-icons sc-gKAaRy iExUpp sc-jMRbPm gciVcE">check</i></div><input type="checkbox" class="sc-fUKshf leAKBp" checked=""></div></div></div></div></div></div></div><div class="SidebarPane_Body--1owv1gk hobDGk"><div role="button" class="SidebarPane_ItemHeader--13ydw5o jmOAMS"><div class="SidebarPane_TitleWrapper--1mt9ft2 hKOChs">Schedule a notebook run</div><div class="SidebarPane_ButtonWrapper--1siykkc fvXTbe"></div><div class="SidebarPane_ChevronWrapper--qm9hj3 jkhhYy"><button class="MuiButtonBase-root MuiIconButton-root jss94" tabindex="0" type="button" title="Expand Schedule a notebook run box" style="float: right;"><span class="MuiIconButton-label"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm">keyboard_arrow_down</i></span><span class="MuiTouchRipple-root"></span></button></div></div></div><div class="SidebarPane_Body--1owv1gk hobDGk"><div role="button" class="SidebarPane_ItemHeader--13ydw5o jmOAMS"><div class="SidebarPane_TitleWrapper--1mt9ft2 hKOChs">Code Help</div><div class="SidebarPane_ButtonWrapper--1siykkc fvXTbe"></div><div class="SidebarPane_ChevronWrapper--qm9hj3 jkhhYy"><button class="MuiButtonBase-root MuiIconButton-root jss94" tabindex="0" type="button" title="Collapse Code Help box" style="float: right;"><span class="MuiIconButton-label"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm">keyboard_arrow_up</i></span><span class="MuiTouchRipple-root"></span></button></div></div><div class="SidebarPane_ItemBody--tqtqts fPzlkM"><div class="Snippets_Body--1qbzaco QoWGn"><div aria-live="assertive" aria-atomic="true" aria-hidden="true" class="sc-HvCEC fzEqJj mdc-snackbar mdc-snackbar--leading"><div class="mdc-snackbar__surface"><div role="status" aria-live="polite" class="mdc-snackbar__label">Copied!<div style="display: none;"></div></div><div class="mdc-snackbar__actions"><i aria-hidden="true" role="button" tabindex="0" data-mdc-ripple-is-unbounded="true" class="rmwc-icon google-material-icons mdc-snackbar__dismiss mdc-ripple-upgraded--unbounded mdc-ripple-upgraded mdc-snackbar__dismiss mdc-icon-button" style="--mdc-ripple-fg-size:0px; --mdc-ripple-fg-scale:NaN; --mdc-ripple-left:0px; --mdc-ripple-top:0px;">close</i></div></div></div><div class="sc-fkmfBh jNwuaW Snippets_TextFieldWrapper--1hz7w7a dTaBuJ mdc-ripple-upgraded sc-fkmfBh jNwuaW Snippets_TextFieldWrapper--1hz7w7a dTaBuJ mdc-ripple-surface mdc-text-field mdc-text-field--upgraded mdc-text-field--outlined mdc-text-field--with-leading-icon"><i class="rmwc-icon google-material-icons mdc-text-field__icon">search</i><input type="text" margin="normal" id="textfield-e2g5a4pw6s" class="mdc-text-field__input" value=""><div class="mdc-notched-outline mdc-notched-outline--upgraded"><div class="mdc-notched-outline__leading"></div><div class="mdc-notched-outline__notch"><label class="mdc-floating-label" for="textfield-e2g5a4pw6s" style="">Find Code Help</label></div><div class="mdc-notched-outline__trailing"></div></div></div><div class="Snippets_Content--1cgyhdq hmjUgQ"><div>Search for examples of how to do things</div></div></div></div></div></div></div></div></div></div><div class="sc-iQTVEV kZOgXZ" style="position: relative; flex-basis: 40px; display: flex; flex-direction: column;"><div direction="vertical" class="sc-jMZYIo cVDwKW"><div role="separator" aria-orientation="horizontal"></div></div><div style="height: 40px;"><div class="Terminal_Body--io7fwe iWgsrB"><div class="TerminalHeader_Body--1riogjs bquFUz"><div class="TerminalHeader_TitleWrapper--bac7xk fcaHZu">Console</div><button title="Show console" class="TerminalHeader_TerminalButton--gq97xh TerminalHeader_TerminalTransparentButton--14ic37w dpVwhn gjiUup"><i sizevalue="20px" class="rmwc-icon google-material-icons sc-gKAaRy iExRbS">keyboard_arrow_up</i></button></div></div></div></div><span></span></div></div><div class="sc-cVJgsR jvyUbZ"></div><div aria-live="assertive" aria-atomic="true" aria-hidden="true" class="sc-dhWmbD cbgiTp mdc-snackbar mdc-snackbar--leading"><div class="mdc-snackbar__surface"><div role="status" aria-live="polite" class="mdc-snackbar__label"><div style="display: none;"></div></div><div class="mdc-snackbar__actions"></div></div></div></div></div></div><div id="modal-root"></div><div aria-hidden="true" class="mdc-menu sc-dvXYtj eeRXkQ mdc-menu-surface" style="transform-origin: left top; left: 440.906px; top: 69px; max-height: 865px;"><div role="menu" class="mdc-list mdc-menu__items mdc-list"><div role="menuitem" tabindex="0" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item"><div class="sc-GvhzO kSqeJg"><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl">Code</p></div></div><div role="menuitem" tabindex="0" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item"><div class="sc-GvhzO kSqeJg"><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl">Markdown</p></div></div></div></div><div aria-hidden="true" class="mdc-menu sc-dvXYtj eeRXkQ SessionMenu_Menu--oip47e kSArak mdc-menu-surface" style="transform-origin: left top; left: 0px; top: 0px; max-height: 934px;"><div role="menu" class="mdc-list mdc-menu__items mdc-list"><div role="menuitem" tabindex="0" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item"><div class="sc-GvhzO kSqeJg"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm sc-fcmMJX bRzrLL">settings_backup_restore</i><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl"><p class="sc-kfYoZR sc-fKgJPI eSXnAK cxbltl">Restart &amp; Clear Cell Outputs</p></p></div></div><div role="menuitem" tabindex="0" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item"><div class="sc-GvhzO kSqeJg"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm sc-fcmMJX bRzrLL">info</i><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl"><p class="sc-kfYoZR sc-fKgJPI eSXnAK cxbltl">View Session Metrics</p></p></div></div><div role="menuitem" tabindex="0" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item"><div class="sc-GvhzO kSqeJg"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm sc-fcmMJX bRzrLL">open_in_new</i><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl"><p class="sc-kfYoZR sc-fKgJPI eSXnAK cxbltl">Upgrade to Google Cloud AI Notebooks</p></p></div></div><div role="menuitem" tabindex="0" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item"><div class="sc-GvhzO kSqeJg"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm sc-fcmMJX bRzrLL">memory</i><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl"><div style="display: flex;"><span>Accelerator</span><div class="sc-bQdwJz jVXKbk mdc-menu-surface--anchor"><i color="#47494D" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy etkwan">arrow_right</i></div></div></p></div></div></div></div><div class="sc-iMqSYT cDletB sc-jTOWXx cBovTR mdc-menu-surface" style="transform-origin: left bottom; left: 0px; bottom: 8px; max-height: 926px;"><div role="document"><div class="sc-lBMZo irSqgG"><ul class="km-list km-list--icon km-list--three-line sc-jiaAFy glSa-DU"><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-ieKCvr fKdnmc"><a class="sc-khIgEk hQhHpX"><div class="sc-cOifOu haQoIp"><div class="sc-Arkif eJDRKz"><img src="./如何生成文本：使用不同的解码方法通过 Transformers 生成语言 _ Kaggle_files/default-thumb.png"></div><div class="sc-jgPyTC fuJtcf"><div class="sc-iCoGMd sc-dIvrsQ sc-gSYDnn cHRTxu biCrYn lfVdgH">如何生成文本：使用不同的解码方法通过 Transformers 生成语言</div><span class="sc-ezzafa sc-bYwzuL sc-laZMeE fQxGZC fDDjHD illQEd">Interactive Session</span><span class="sc-ezzafa sc-bYwzuL sc-laZMeE fQxGZC fDDjHD illQEd">Running: <span>a minute</span></span></div></div></a><div class="sc-hTRkXV ePWFTl"><div class="sc-gVPcaA dbdPny"><p class="sc-bCwfaz sc-iwajpm jLqmUy kydRHc"><span>a minute</span></p><div class="mdc-menu-surface--anchor"><button aria-label="more_horiz" class="sc-jSFjdj iMZsEG google-material-icons">more_horiz</button></div></div></div></div></li></ul><ul class="km-list"><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-heeTGt VUPat"><a class="sc-khIgEk hQhHpX"><div class="sc-cOifOu haQoIp"><div class="sc-Arkif eJDRKz"><div class="sc-cUZYnF bGVApN"><i emphasis="high" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm sc-lndvYQ gaJHBk">auto_awesome_motion</i><div color="#FAE041" class="sc-hZwEmZ cOYELl">1</div></div></div><div class="sc-iCoGMd sc-dIvrsQ sc-gSYDnn cHRTxu biCrYn lfVdgH"><p class="sc-kfYoZR sc-fKgJPI gpHTvJ cxbltl">1 Active Event</p></div></div></a><div class="sc-hTRkXV ePWFTl"><i emphasis="high" sizevalue="24px" role="button" tabindex="0" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm">expand_more</i></div></div></li></ul></div></div></div><div class="sc-iMqSYT cDletB sc-jTOWXx cBovTR mdc-menu-surface"><div role="document"><div class="sc-lBMZo irSqgG"><ul class="km-list km-list--icon km-list--three-line sc-jiaAFy glSa-DU"><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-ieKCvr fKdnmc"><a class="sc-khIgEk hQhHpX"><div class="sc-cOifOu haQoIp"><div class="sc-Arkif eJDRKz"><img src="./如何生成文本：使用不同的解码方法通过 Transformers 生成语言 _ Kaggle_files/default-thumb.png"></div><div class="sc-jgPyTC fuJtcf"><div class="sc-iCoGMd sc-dIvrsQ sc-gSYDnn cHRTxu biCrYn lfVdgH">如何生成文本：使用不同的解码方法通过 Transformers 生成语言</div><span class="sc-ezzafa sc-bYwzuL sc-laZMeE fQxGZC fDDjHD illQEd">Interactive Session</span><span class="sc-ezzafa sc-bYwzuL sc-laZMeE fQxGZC fDDjHD illQEd">Running: <span>a minute</span></span></div></div></a><div class="sc-hTRkXV ePWFTl"><div class="sc-gVPcaA dbdPny"><p class="sc-bCwfaz sc-iwajpm jLqmUy kydRHc"><span>a minute</span></p><div class="mdc-menu-surface--anchor"><button aria-label="more_horiz" class="sc-jSFjdj iMZsEG google-material-icons">more_horiz</button></div></div></div></div></li></ul><ul class="km-list"><li class="sc-dPaNzc fqbJCS"><div class="sc-bBjRSN kTXmvo sc-heeTGt VUPat"><a class="sc-khIgEk hQhHpX"><div class="sc-cOifOu haQoIp"><div class="sc-Arkif eJDRKz"><div class="sc-cUZYnF bGVApN"><i emphasis="high" sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm sc-lndvYQ gaJHBk">auto_awesome_motion</i><div color="#FAE041" class="sc-hZwEmZ cOYELl">1</div></div></div><div class="sc-iCoGMd sc-dIvrsQ sc-gSYDnn cHRTxu biCrYn lfVdgH"><p class="sc-kfYoZR sc-fKgJPI gpHTvJ cxbltl">1 Active Event</p></div></div></a><div class="sc-hTRkXV ePWFTl"><i emphasis="high" sizevalue="24px" role="button" tabindex="0" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm">expand_more</i></div></div></li></ul></div></div></div><div aria-hidden="true" class="mdc-menu sc-dvXYtj eeRXkQ sc-fIkgrG kQjFsV SessionMenu_ChildMenu--1xbreti jrJaUw mdc-menu-surface" style="transform-origin: left top; left: 1208.34px; top: 280px; max-height: 597px;"><div role="menu" class="mdc-list mdc-menu__items mdc-list"><div role="menuitem" tabindex="0" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item"><div class="sc-GvhzO kSqeJg"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm sc-fcmMJX bRzrLL">check</i><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl"><p class="sc-kfYoZR sc-fKgJPI eSXnAK cxbltl">None</p></p></div></div><div role="menuitem" tabindex="0" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item"><div class="sc-GvhzO kSqeJg"><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl"><p class="sc-kfYoZR sc-fKgJPI eSXnAK cxbltl">GPU</p></p></div></div><div role="menuitem" tabindex="0" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item"><div class="sc-GvhzO kSqeJg"><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl"><p class="sc-kfYoZR sc-fKgJPI eSXnAK cxbltl">TPU v3-8</p></p></div></div></div></div><div aria-hidden="true" class="mdc-menu sc-dvXYtj eeRXkQ mdc-menu-surface"><div role="menu" class="mdc-list mdc-menu__items mdc-list"><div role="menuitem" tabindex="0" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item"><div class="sc-GvhzO kSqeJg"><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl">Python</p></div></div><div role="menuitem" tabindex="0" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item"><div class="sc-GvhzO kSqeJg"><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl">R</p></div></div></div></div><div aria-hidden="true" class="mdc-menu sc-dvXYtj eeRXkQ mdc-menu-surface" style="transform-origin: right top; right: 90.0625px; top: 311px; max-height: 623px;"><div role="menu" class="mdc-list mdc-menu__items mdc-list"><div role="menuitem" tabindex="0" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item" style="--mdc-ripple-fg-size:153px; --mdc-ripple-fg-scale:1.76772; --mdc-ripple-fg-translate-start:40.5px, -48.4219px; --mdc-ripple-fg-translate-end:51.5px, -52.5px;"><div class="sc-GvhzO kSqeJg"><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl">None</p></div></div><div role="menuitem" tabindex="-1" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item" style="--mdc-ripple-fg-size:153px; --mdc-ripple-fg-scale:1.76772; --mdc-ripple-fg-translate-start:6.55469px, -59.8789px; --mdc-ripple-fg-translate-end:51.5px, -52.5px;"><div class="sc-GvhzO kSqeJg"><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl">GPU</p></div></div><div role="menuitem" tabindex="0" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item"><div class="sc-GvhzO kSqeJg"><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl">TPU v3-8</p></div></div></div></div><div aria-hidden="true" class="mdc-menu sc-dvXYtj eeRXkQ sc-jGFdNM dQDePF mdc-menu-surface"><div role="menu" class="mdc-list mdc-menu__items mdc-list"><a href="https://www.kaggle.com/s/20731513/edit" target="_blank" class="sc-gsWcmt grZHMV"><div role="menuitem" tabindex="0" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item"><div class="sc-GvhzO kSqeJg"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm sc-fcmMJX bRzrLL">edit</i><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl">Edit</p></div></div></a><div role="menuitem" tabindex="0" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item"><div class="sc-GvhzO kSqeJg"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm sc-fcmMJX bRzrLL">stop</i><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl">Stop Session</p></div></div></div></div><div aria-hidden="true" class="mdc-menu sc-dvXYtj eeRXkQ sc-jGFdNM dQDePF mdc-menu-surface"><div role="menu" class="mdc-list mdc-menu__items mdc-list"><a href="https://www.kaggle.com/s/20731513/edit" target="_blank" class="sc-gsWcmt grZHMV"><div role="menuitem" tabindex="0" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item"><div class="sc-GvhzO kSqeJg"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm sc-fcmMJX bRzrLL">edit</i><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl">Edit</p></div></div></a><div role="menuitem" tabindex="0" class="sc-fuISkM cnWRso mdc-ripple-upgraded sc-fuISkM cnWRso mdc-list-item"><div class="sc-GvhzO kSqeJg"><i sizevalue="24px" class="rmwc-icon google-material-icons sc-gKAaRy iExPwm sc-fcmMJX bRzrLL">stop</i><p class="sc-kfYoZR sc-fKgJPI jaxPpm cxbltl">Stop Session</p></div></div></div></div></body></html>
